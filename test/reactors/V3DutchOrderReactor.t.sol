@@ -1545,6 +1545,67 @@ contract V3DutchOrderTest is PermitSignature, DeployPermit2, BaseReactorTest {
         assertEq(resolvedOrder.outputs[0].amount, 1001, "Output should round up");
     }
 
+    /// @notice Gas adjustment ignores tx priority fee when basefee stays constant
+    function testV3GasAdjustmentIgnoresPriorityFee() public {
+        uint256 currentBlock = 1000;
+        vm.roll(currentBlock);
+        // Order created when basefee is 1 gwei
+        vm.fee(1 gwei);
+
+        SignedOrder memory order = generateOrder(
+            TestDutchOrderSpec({
+                currentBlock: currentBlock,
+                startBlock: currentBlock,
+                deadline: currentBlock + 10,
+                input: V3DutchInput(tokenIn, 1 ether, CurveBuilder.emptyCurve(), 20 ether, 1 ether),
+                outputs: OutputsBuilder.singleV3Dutch(
+                    V3DutchOutput(address(tokenOut), 1 ether, CurveBuilder.emptyCurve(), address(0), 0, 1 ether)
+                )
+            })
+        );
+
+        // Simulate high priority fee with unchanged basefee
+        vm.txGasPrice(11 gwei);
+        vm.fee(1 gwei);
+        ResolvedOrder memory resolvedOrder = quoter.quote(order.order, order.sig);
+
+        // Gas delta uses block.basefee only so no adjustment occurs
+        assertEq(resolvedOrder.input.amount, 1 ether);
+        assertEq(resolvedOrder.outputs[0].amount, 1 ether);
+
+        // Expected input if tx.gasprice difference were used
+        uint256 expectedInput = 11 ether;
+        assertNotEq(resolvedOrder.input.amount, expectedInput);
+    }
+
+    /// @notice Starting basefee higher than execution basefee mis-scales order
+    function testV3GasAdjustmentHighStartBaseFee() public {
+        uint256 currentBlock = 1000;
+        vm.roll(currentBlock);
+        // Order created when basefee is 10 gwei
+        vm.fee(10 gwei);
+
+        SignedOrder memory order = generateOrder(
+            TestDutchOrderSpec({
+                currentBlock: currentBlock,
+                startBlock: currentBlock,
+                deadline: currentBlock + 10,
+                input: V3DutchInput(tokenIn, 1 ether, CurveBuilder.emptyCurve(), 2 ether, 1 ether),
+                outputs: OutputsBuilder.singleV3Dutch(
+                    V3DutchOutput(address(tokenOut), 1 ether, CurveBuilder.emptyCurve(), address(0), 0, 1 ether)
+                )
+            })
+        );
+
+        // Execution when basefee drops to 1 gwei
+        vm.fee(1 gwei);
+        ResolvedOrder memory resolvedOrder = quoter.quote(order.order, order.sig);
+
+        // Gas delta of -9 gwei reduces input to zero and increases output
+        assertEq(resolvedOrder.input.amount, 0);
+        assertEq(resolvedOrder.outputs[0].amount, 10 ether);
+    }
+
     /* Test helpers */
 
     struct TestDutchOrderSpec {
