@@ -1606,6 +1606,35 @@ contract V3DutchOrderTest is PermitSignature, DeployPermit2, BaseReactorTest {
         assertEq(resolvedOrder.outputs[0].amount, 10 ether);
     }
 
+    /// @notice Constant L2 basefee mismatches tx gas price and mis-scales the order
+    function testV3GasAdjustmentL2BasefeeMismatch() public {
+        uint256 currentBlock = 1000;
+        vm.roll(currentBlock);
+        // Order created when basefee is 20 gwei
+        vm.fee(20 gwei);
+
+        SignedOrder memory order = generateOrder(
+            TestDutchOrderSpec({
+                currentBlock: currentBlock,
+                startBlock: currentBlock,
+                deadline: currentBlock + 10,
+                input: V3DutchInput(tokenIn, 1 ether, CurveBuilder.emptyCurve(), 2 ether, 1 ether),
+                outputs: OutputsBuilder.singleV3Dutch(
+                    V3DutchOutput(address(tokenOut), 1 ether, CurveBuilder.emptyCurve(), address(0), 0, 1 ether)
+                )
+            })
+        );
+
+        // Execution on an L2 where basefee stays near zero but priority fee is high
+        vm.fee(0 gwei);
+        vm.txGasPrice(20 gwei);
+        ResolvedOrder memory resolvedOrder = quoter.quote(order.order, order.sig);
+
+        // Gas delta of -20 gwei results in extreme adjustment unrelated to tx gas price
+        assertEq(resolvedOrder.input.amount, 0);
+        assertEq(resolvedOrder.outputs[0].amount, 21 ether);
+    }
+
     /* Test helpers */
 
     struct TestDutchOrderSpec {
