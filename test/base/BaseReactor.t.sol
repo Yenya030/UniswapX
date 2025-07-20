@@ -16,6 +16,7 @@ import {MockFeeController} from "../util/mock/MockFeeController.sol";
 import {MockERC20} from "../util/mock/MockERC20.sol";
 import {MockFillContract} from "../util/mock/MockFillContract.sol";
 import {MockFillContractDoubleExecution} from "../util/mock/MockFillContractDoubleExecution.sol";
+import {MockPrepareReactor} from "../util/mock/MockPrepareReactor.sol";
 import {NATIVE} from "../../src/lib/CurrencyLibrary.sol";
 
 abstract contract BaseReactorTest is ReactorEvents, Test, DeployPermit2 {
@@ -298,6 +299,90 @@ abstract contract BaseReactorTest is ReactorEvents, Test, DeployPermit2 {
 
         assertEq(tokenOut.balanceOf(swapper), totalOutputAmount);
         assertEq(tokenIn.balanceOf(address(fillContract)), totalInputAmount);
+    }
+
+    /// @dev Batch execute with protocol fee on outputs
+    function test_base_executeBatchWithFee() public {
+        uint256 inputAmount = ONE;
+        uint256 outputAmount = 2 * inputAmount;
+        uint8 feeBps = 3;
+
+        vm.prank(PROTOCOL_FEE_OWNER);
+        reactor.setProtocolFeeController(address(feeController));
+        feeController.setFee(tokenIn, address(tokenOut), feeBps);
+
+        tokenIn.mint(address(swapper), inputAmount * 3);
+        uint256 totalOutputAmount = 3 * outputAmount;
+        uint256 feeAmount = totalOutputAmount * feeBps / 10000;
+        tokenOut.mint(address(fillContract), 6 ether + feeAmount);
+        tokenIn.forceApprove(swapper, address(permit2), type(uint256).max);
+
+        ResolvedOrder[] memory orders = new ResolvedOrder[](2);
+
+        orders[0] = ResolvedOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100).withNonce(
+                0
+            ),
+            input: InputToken(tokenIn, inputAmount, inputAmount),
+            outputs: OutputsBuilder.single(address(tokenOut), outputAmount, swapper),
+            sig: hex"00",
+            hash: bytes32(0)
+        });
+
+        orders[1] = ResolvedOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100).withNonce(
+                1
+            ),
+            input: InputToken(tokenIn, 2 * inputAmount, 2 * inputAmount),
+            outputs: OutputsBuilder.single(address(tokenOut), 2 * outputAmount, swapper),
+            sig: hex"00",
+            hash: bytes32(0)
+        });
+
+        (SignedOrder[] memory signedOrders, bytes32[] memory orderHashes) = createAndSignBatchOrders(orders);
+        vm.expectEmit(true, true, true, true);
+        emit Fill(orderHashes[0], address(fillContract), swapper, orders[0].info.nonce);
+        vm.expectEmit(true, true, true, true);
+        emit Fill(orderHashes[1], address(fillContract), swapper, orders[1].info.nonce);
+
+        uint256 fillContractOutputBalanceStart = tokenOut.balanceOf(address(fillContract));
+
+        fillContract.executeBatch(signedOrders);
+
+        assertEq(tokenOut.balanceOf(swapper), totalOutputAmount);
+        assertEq(tokenOut.balanceOf(feeRecipient), feeAmount);
+        assertEq(tokenIn.balanceOf(address(fillContract)), 3 * inputAmount);
+        assertEq(tokenOut.balanceOf(address(fillContract)), fillContractOutputBalanceStart - totalOutputAmount - feeAmount);
+    }
+
+    /// @dev Verify that _prepare does not persist injected fee outputs
+    function test_base_prepareFeeOutputsVanishing() public {
+        uint256 inputAmount = ONE;
+        uint256 outputAmount = 2 * inputAmount;
+        uint8 feeBps = 3;
+
+        MockPrepareReactor prepReactor = new MockPrepareReactor(permit2, PROTOCOL_FEE_OWNER);
+        vm.prank(PROTOCOL_FEE_OWNER);
+        prepReactor.setProtocolFeeController(address(feeController));
+        feeController.setFee(tokenIn, address(tokenOut), feeBps);
+
+        ResolvedOrder[] memory orders = new ResolvedOrder[](1);
+        orders[0] = ResolvedOrder({
+            info: OrderInfoBuilder.init(address(prepReactor)).withSwapper(swapper).withDeadline(block.timestamp + 100).withNonce(0),
+            input: InputToken(tokenIn, inputAmount, inputAmount),
+            outputs: OutputsBuilder.single(address(tokenOut), outputAmount, swapper),
+            sig: hex"00",
+            hash: bytes32(0)
+        });
+
+        ResolvedOrder[] memory prepared = prepReactor.prepareOrders(orders);
+
+        uint256 feeAmount = outputAmount * feeBps / 10000;
+        assertEq(prepared[0].outputs.length, 2);
+        assertEq(prepared[0].outputs[1].amount, feeAmount);
+
+        // Per reported bug the original orders array should remain unchanged
+        assertEq(orders[0].outputs.length, 1);
     }
 
     /// @dev Basic batch execute test with native output
