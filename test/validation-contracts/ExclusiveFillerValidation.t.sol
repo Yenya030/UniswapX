@@ -96,6 +96,32 @@ contract ExclusiveFillerValidationTest is Test, PermitSignature, DeployPermit2 {
         fillContract.execute(SignedOrder(abi.encode(order), signOrder(swapperPrivateKey, address(permit2), order)));
     }
 
+    // The order specifies address(0) as the exclusive filler which should revert for all fillers
+    function testZeroAddressExclusiveFillerFails() public {
+        uint256 inputAmount = 10 ** 18;
+        uint256 outputAmount = 2 * inputAmount;
+
+        tokenIn.mint(address(swapper), inputAmount);
+        tokenOut.mint(address(fillContract), outputAmount);
+        tokenIn.forceApprove(swapper, address(permit2), type(uint256).max);
+
+        DutchOrder memory order = DutchOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100)
+                .withValidationContract(exclusiveFillerValidation).withValidationData(
+                abi.encode(address(0), block.timestamp + 50)
+            ),
+            decayStartTime: block.timestamp,
+            decayEndTime: block.timestamp + 100,
+            input: DutchInput(tokenIn, inputAmount, inputAmount),
+            outputs: OutputsBuilder.singleDutch(address(tokenOut), outputAmount, outputAmount, swapper)
+        });
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ExclusiveFillerValidation.NotExclusiveFiller.selector, address(fillContract))
+        );
+        fillContract.execute(SignedOrder(abi.encode(order), signOrder(swapperPrivateKey, address(permit2), order)));
+    }
+
     // Ensure a different filler (not the one encoded in additionalValidationData) is able to execute after last exclusive
     // timestamp
     function testNonExclusiveFillerSucceedsPastExclusiveTimestamp() public {
