@@ -98,6 +98,10 @@ contract V2DutchOrderReactor is BaseReactor {
                 if (outputAmount < output.startAmount) {
                     revert InvalidCosignerOutput();
                 }
+                // `output` is a reference to `order.baseOutputs[i]` since
+                // both live in memory, so updating `output.startAmount`
+                // automatically updates the value in the array.
+                // No explicit assignment back is required.
                 output.startAmount = outputAmount;
             }
         }
