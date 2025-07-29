@@ -108,15 +108,16 @@ contract V2DutchOrderReactor is BaseReactor {
     /// - decayEndTime must be greater than decayStartTime
     /// - if there's input decay, outputs must not decay
     /// @dev Throws if the order is invalid
-    function _validateOrder(bytes32 orderHash, V2DutchOrder memory order) internal pure {
+    function _validateOrder(bytes32 orderHash, V2DutchOrder memory order) internal view {
         if (order.info.deadline < order.cosignerData.decayEndTime) {
             revert DeadlineBeforeEndTime();
         }
 
         (bytes32 r, bytes32 s) = abi.decode(order.cosignature, (bytes32, bytes32));
         uint8 v = uint8(order.cosignature[64]);
-        // cosigner signs over (orderHash || cosignerData)
-        address signer = ecrecover(keccak256(abi.encodePacked(orderHash, abi.encode(order.cosignerData))), v, r, s);
+        // cosigner signs over (orderHash || chainId || cosignerData)
+        address signer =
+            ecrecover(keccak256(abi.encodePacked(orderHash, block.chainid, abi.encode(order.cosignerData))), v, r, s);
         if (order.cosigner != signer || signer == address(0)) {
             revert InvalidCosignature();
         }
