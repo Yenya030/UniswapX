@@ -75,6 +75,7 @@ library ExclusivityLib {
         for (uint256 i = 0; i < outputs.length;) {
             OutputToken memory output = outputs[i];
             output.amount = output.amount.mulDivUp(BPS + exclusivityOverrideBps, BPS);
+            outputs[i] = output;
 
             unchecked {
                 i++;
