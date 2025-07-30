@@ -126,6 +126,24 @@ contract OrderQuoterTest is Test, PermitSignature, ReactorEvents, DeployPermit2 
         assertEq(quote.outputs[0].amount, ONE);
     }
 
+    function testQuoteDoesNotTransferTokens() public {
+        tokenIn.forceApprove(swapper, address(permit2), ONE);
+        LimitOrder memory order = LimitOrder({
+            info: OrderInfoBuilder.init(address(limitOrderReactor)).withSwapper(address(swapper)),
+            input: InputToken(tokenIn, ONE, ONE),
+            outputs: OutputsBuilder.single(address(tokenOut), ONE, address(swapper))
+        });
+        bytes memory sig = signOrder(swapperPrivateKey, address(permit2), order);
+
+        uint256 swapperBalanceBefore = tokenIn.balanceOf(swapper);
+        uint256 quoterBalanceBefore = tokenIn.balanceOf(address(quoter));
+
+        quoter.quote(abi.encode(order), sig);
+
+        assertEq(tokenIn.balanceOf(swapper), swapperBalanceBefore);
+        assertEq(tokenIn.balanceOf(address(quoter)), quoterBalanceBefore);
+    }
+
     function testQuoteLimitOrderDeadlinePassed() public {
         uint256 timestamp = block.timestamp;
         vm.warp(timestamp + 100);
