@@ -99,3 +99,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test**: `NonlinearDutchDecayLibOutOfOrderTest.testOutOfOrderBlocks` executes such a curve and shows the decay increases to an unexpected amount instead of reverting.
 - **Result**: **Bug discovered** – library accepts out-of-order curves leading to unintuitive decayed values.
 
+
+## Callback Order Mutation
+- **Description**: `executeWithCallback` hands `ResolvedOrder` data to the fill contract. We tested whether mutating this memory during the callback could redirect tokens.
+- **Test**: `LimitOrderReactorTamperTest.testCallbackCanModifyOutputs` uses `MockFillContractTamper` to change the output recipient in-place during the callback.
+- **Result**: The modifications do not persist and the order still pays the original recipient, so this vector is safely handled.
