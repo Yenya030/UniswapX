@@ -104,3 +104,7 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: `executeWithCallback` hands `ResolvedOrder` data to the fill contract. We tested whether mutating this memory during the callback could redirect tokens.
 - **Test**: `LimitOrderReactorTamperTest.testCallbackCanModifyOutputs` uses `MockFillContractTamper` to change the output recipient in-place during the callback.
 - **Result**: The modifications do not persist and the order still pays the original recipient, so this vector is safely handled.
+## Priority Fee Overflow
+- **Description**: Scaling factors in `PriorityFeeLib` multiply `priorityFee` by `mpsPerPriorityFeeWei` without overflow checks. Extremely large values wrap, leaving orders unscaled.
+- **Test**: `testScaleInputPriorityFeeOverflow` in `test/lib/PriorityFeeLib.t.sol` uses a huge `priorityFee` that should zero out the input but instead returns the original amount.
+- **Result**: **Bug discovered** – unchecked multiplication allows overflow leading to incorrect scaling.
