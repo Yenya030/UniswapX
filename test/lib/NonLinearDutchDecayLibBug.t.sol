@@ -13,6 +13,7 @@ import {V3DutchOutput} from "../../src/lib/V3DutchOrderLib.sol";
 contract NonlinearDutchDecayLibBugTest is Test, BlockNumberish {
     MockERC20 token = new MockERC20("T","T",18);
 
+    /// forge-config: default.allow_internal_expect_revert = true
     function testMismatchedBlocksAndAmounts() public {
         uint16[] memory blocks = new uint16[](2);
         blocks[0] = 100;

@@ -1,0 +1,11 @@
+{
+  "BaseExecuteSingleWithFee": "186484",
+  "ExecuteBatch": "196225",
+  "ExecuteBatchMultipleOutputs": "207301",
+  "ExecuteBatchMultipleOutputsDifferentTokens": "262277",
+  "ExecuteBatchNativeOutput": "190467",
+  "ExecuteSingle": "146795",
+  "ExecuteSingleNativeOutput": "133965",
+  "ExecuteSingleValidation": "159608",
+  "RevertInvalidNonce": "20635"
+}
