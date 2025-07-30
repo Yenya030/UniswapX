@@ -79,3 +79,7 @@ This document tracks manual fuzzing and unit tests exploring potential vulnerabi
 - **Vector**: Verify that `_prepare` does not mutate caller-provided memory while still injecting protocol fee outputs correctly.
 - **Test**: `BaseReactorTest.test_base_prepareFeeOutputsVanishing` (existing) confirms the input array is unchanged while fees are applied internally.
 - **Result**: No bug – protocol fee logic works as intended.
+
+
+## OrderQuoter Token Theft Attempt
+We tested whether invoking `OrderQuoter.quote` with a fully signed order could transfer tokens from the swapper to the caller since `OrderQuoter.quote` executes `executeWithCallback` on the reactor. The test `testQuoteDoesNotTransferTokens` ensures token balances of both the swapper and the quoter remain unchanged after quoting, confirming the revert prevents any transfer.
