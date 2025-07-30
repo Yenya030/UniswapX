@@ -104,3 +104,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: `executeWithCallback` hands `ResolvedOrder` data to the fill contract. We tested whether mutating this memory during the callback could redirect tokens.
 - **Test**: `LimitOrderReactorTamperTest.testCallbackCanModifyOutputs` uses `MockFillContractTamper` to change the output recipient in-place during the callback.
 - **Result**: The modifications do not persist and the order still pays the original recipient, so this vector is safely handled.
+
+## Leftover ETH refund to non-payable filler
+- **Description**: The reactor refunds any ETH balance to the filler after execution. If the filler contract refuses ETH, this refund reverts and halts order execution. An attacker can send ETH to the reactor to block such fillers.
+- **Test**: `EthOutputNoReceiveTest.testRefundToNonPayableReverts` deploys a `MockFillContractNoReceive` without a payable fallback. After sending stray ETH to the reactor, executing an order reverts with `NativeTransferFailed`.
+- **Result**: **Bug discovered** – leftover ETH can be used to grief non-payable fillers.
