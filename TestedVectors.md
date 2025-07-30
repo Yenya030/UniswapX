@@ -46,6 +46,11 @@ This document tracks manual fuzzing and unit tests exploring potential vulnerabi
 - **Result:** Order executes successfully, transferring the swapper's input tokens to the filler without providing any output tokens. The absence of validation allows trivial token theft.
 - **Status:** **Bug discovered** – see `testExecuteNoOutputs` in `LimitOrderReactorZeroOutputs.t.sol`.
 
+## Dutch Order With No Outputs
+- **Vector:** Execute a `DutchOrder` where the `outputs` array is empty.
+- **Result:** Order executes successfully, transferring the swapper's input tokens to the filler without providing any output tokens. The absence of validation allows trivial token theft.
+- **Status:** **Bug discovered** – see `testExecuteNoOutputs` in `DutchOrderReactorZeroOutputs.t.sol`.
+
 
 ## Limit Order With No Outputs
 - **Vector:** Execute a `LimitOrder` where the `outputs` array is empty.
