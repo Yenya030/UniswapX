@@ -116,3 +116,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `PriorityOrder` where the `outputs` array is empty.
 - **Result:** Order executes successfully, transferring the swapper's input tokens to the filler without providing any output tokens. The absence of validation allows trivial token theft.
 - **Status:** **Bug discovered** – see `testExecuteNoOutputs` in `PriorityOrderReactorZeroOutputs.t.sol`.
+
+
+## Leftover ETH refund to non-payable filler
+- **Description**: The reactor refunds any ETH balance to the filler after execution. If the filler contract refuses ETH, this refund reverts and halts order execution. An attacker can send ETH to the reactor to block such fillers.
+- **Test**: `EthOutputNoReceiveTest.testRefundToNonPayableReverts` deploys a `MockFillContractNoReceive` without a payable fallback. After sending stray ETH to the reactor, executing an order reverts with `NativeTransferFailed`.
+- **Result**: **Bug discovered** – leftover ETH can be used to grief non-payable fillers.
