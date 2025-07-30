@@ -88,3 +88,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 ## Double Execution Across Reactors
 **Description**: Using a custom fill contract to execute an order on one reactor while triggering execution on a second reactor during the callback.
 **Result**: Existing tests show this succeeds without violating state, demonstrating the contract safely handles separate reactor calls.
+
+## Nonlinear Dutch Order with Unsorted Blocks
+- **Description**: Craft a `NonlinearDutchDecay` curve with `relativeBlocks` that are not strictly increasing.
+- **Test**: `NonlinearDutchDecayLibOutOfOrderTest.testOutOfOrderBlocks` executes such a curve and shows the decay increases to an unexpected amount instead of reverting.
+- **Result**: **Bug discovered** – library accepts out-of-order curves leading to unintuitive decayed values.
+
