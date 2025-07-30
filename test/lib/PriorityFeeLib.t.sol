@@ -194,4 +194,18 @@ contract PriorityFeeLibTest is Test {
         OutputToken memory scaledOutput = PriorityFeeLib.scale(output, tx.gasprice);
         assertEq(scaledOutput.amount, output.amount);
     }
+
+    /// @notice scaling with extremely large priority fee should saturate but overflows wrap
+    function testScaleInputPriorityFeeOverflow() public {
+        uint256 priorityFee = 1 << 255;
+        vm.txGasPrice(priorityFee);
+
+        PriorityInput memory input =
+            PriorityInput({token: ERC20(address(0)), amount: amount, mpsPerPriorityFeeWei: 2});
+
+        InputToken memory scaledInput = PriorityFeeLib.scale(input, tx.gasprice);
+
+        // overflow causes no scaling when amount should be zero
+        assertEq(scaledInput.amount, input.amount);
+    }
 }
