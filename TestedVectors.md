@@ -67,3 +67,15 @@ This document tracks manual fuzzing and unit tests exploring potential vulnerabi
 ## Exclusivity Override BPS Overflow
 - **Description**: Passing `type(uint256).max` as `exclusivityOverrideBps` to `ExclusivityLib.handleExclusiveOverrideTimestamp` causes the addition `BPS + exclusivityOverrideBps` to overflow.
 - **Result**: Overflow wraps the value and the override is effectively ignored. Demonstrated in new test `ExclusivityLibOverflowTest`.
+
+
+## Exclusivity Override BPS Overflow
+- **Vector**: Provide an `exclusivityOverrideBps` value close to `uint256` max so that adding it to `BPS` could overflow.
+- **Test**: `ExclusivityLibOverflowTest.testExclusivityOverrideBpsOverflow` ensures that such an input triggers a revert and does not lead to an unchecked overflow.
+- **Result**: No bug – the addition uses Solidity's checked arithmetic and correctly reverts.
+
+
+## Fee Injection Memory Safety
+- **Vector**: Verify that `_prepare` does not mutate caller-provided memory while still injecting protocol fee outputs correctly.
+- **Test**: `BaseReactorTest.test_base_prepareFeeOutputsVanishing` (existing) confirms the input array is unchanged while fees are applied internally.
+- **Result**: No bug – protocol fee logic works as intended.
