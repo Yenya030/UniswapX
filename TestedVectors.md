@@ -88,3 +88,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 ## Double Execution Across Reactors
 **Description**: Using a custom fill contract to execute an order on one reactor while triggering execution on a second reactor during the callback.
 **Result**: Existing tests show this succeeds without violating state, demonstrating the contract safely handles separate reactor calls.
+
+## Callback Order Mutation
+- **Description**: `executeWithCallback` hands `ResolvedOrder` data to the fill contract. We tested whether mutating this memory during the callback could redirect tokens.
+- **Test**: `LimitOrderReactorTamperTest.testCallbackCanModifyOutputs` uses `MockFillContractTamper` to change the output recipient in-place during the callback.
+- **Result**: The modifications do not persist and the order still pays the original recipient, so this vector is safely handled.
