@@ -680,6 +680,7 @@ abstract contract BaseReactorTest is ReactorEvents, Test, DeployPermit2 {
         assertEq(tokenOut.balanceOf(address(swapper)), swapperOutputBalanceStart + 2 ether);
     }
 
+
     /// @dev Basic execute test with protocol fee, checks balance before and after
     function test_base_executeWithFee(uint128 inputAmount, uint128 outputAmount, uint256 deadline, uint8 feeBps)
         public
