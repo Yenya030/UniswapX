@@ -12,6 +12,7 @@ import {MockValidationContract} from "../util/mock/MockValidationContract.sol";
 import {MockFillContract} from "../util/mock/MockFillContract.sol";
 import {MockFeeController} from "../util/mock/MockFeeController.sol";
 import {MockFillContractWithOutputOverride} from "../util/mock/MockFillContractWithOutputOverride.sol";
+import {MockFillContractReentrant} from "../util/mock/MockFillContractReentrant.sol";
 import {LimitOrderReactor, LimitOrder} from "../../src/reactors/LimitOrderReactor.sol";
 import {BaseReactor} from "../../src/reactors/BaseReactor.sol";
 import {IValidationCallback} from "../../src/interfaces/IValidationCallback.sol";
@@ -240,5 +241,34 @@ contract LimitOrderReactorTest is PermitSignature, DeployPermit2, BaseReactorTes
         );
         vm.expectRevert(InvalidSigner.selector);
         fillContract.execute(SignedOrder(abi.encode(order), sig));
+    }
+
+    function testReentrancySameReactor() public {
+        MockFillContractReentrant fill = new MockFillContractReentrant(address(reactor));
+        tokenIn.mint(address(swapper), 2 ether);
+        tokenOut.mint(address(fill), 2 ether);
+        tokenIn.forceApprove(swapper, address(permit2), type(uint256).max);
+
+        ResolvedOrder memory order1 = ResolvedOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(address(swapper)).withDeadline(block.timestamp + 1000),
+            input: InputToken(tokenIn, ONE, ONE),
+            outputs: OutputsBuilder.single(address(tokenOut), ONE, address(swapper)),
+            sig: hex"00",
+            hash: bytes32(0)
+        });
+
+        ResolvedOrder memory order2 = ResolvedOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(address(swapper)).withDeadline(block.timestamp + 1000).withNonce(1234),
+            input: InputToken(tokenIn, ONE, ONE),
+            outputs: OutputsBuilder.single(address(tokenOut), ONE, address(swapper)),
+            sig: hex"00",
+            hash: bytes32(0)
+        });
+
+        (SignedOrder memory signed1,) = createAndSignOrder(order1);
+        (SignedOrder memory signed2,) = createAndSignOrder(order2);
+
+        vm.expectRevert("ReentrancyGuard: reentrant call");
+        fill.execute(signed1, signed2);
     }
 }

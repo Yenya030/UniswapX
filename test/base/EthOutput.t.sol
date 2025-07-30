@@ -445,4 +445,32 @@ contract EthOutputDirectFillerTest is Test, PermitSignature, DeployPermit2 {
         vm.expectRevert(CurrencyLibrary.NativeTransferFailed.selector);
         reactor.executeBatch{value: ONE * 5 / 2}(signedOrders);
     }
+
+    /// @dev Any ETH left in the reactor is refunded to the next filler
+    function testLeftoverEthRefundedToFiller() public {
+        // Deposit 1 ether to the reactor from an unrelated address
+        address stranger = address(9999);
+        vm.deal(stranger, ONE);
+        vm.prank(stranger);
+        address(reactor).call{value: ONE}("");
+
+        uint256 inputAmount = ONE;
+        tokenIn1.mint(address(swapper1), inputAmount);
+        vm.deal(directFiller, ONE);
+
+        DutchOrder memory order = DutchOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper1).withDeadline(block.timestamp + 100),
+            decayStartTime: block.timestamp,
+            decayEndTime: block.timestamp + 100,
+            input: DutchInput(tokenIn1, inputAmount, inputAmount),
+            outputs: OutputsBuilder.singleDutch(NATIVE, ONE, ONE, swapper1)
+        });
+
+        vm.prank(directFiller);
+        reactor.execute{value: ONE}(SignedOrder(abi.encode(order), signOrder(swapperPrivateKey1, address(permit2), order)));
+
+        // directFiller should receive the stranger's ETH in addition to refunding any excess
+        assertEq(directFiller.balance, ONE);
+        assertEq(address(reactor).balance, 0);
+    }
 }
