@@ -47,6 +47,26 @@ library NonlinearDutchDecayLib {
             revert InvalidDecayCurve();
         }
 
+        // Check that the packed relativeBlocks has the same number of entries as the
+        // relativeAmounts array. Zero is a valid starting block so we must count the
+        // number of non-zero entries after the first element.
+        uint256 packedBlocks = params.curve.relativeBlocks;
+        uint256 blocksLength;
+        if (packedBlocks == 0) {
+            blocksLength = params.curve.relativeAmounts.length == 0 ? 0 : 1;
+        } else {
+            blocksLength = 1;
+            for (uint256 i = 1; i < 16; i++) {
+                if (uint16(packedBlocks >> (i * 16)) == 0) break;
+                unchecked {
+                    ++blocksLength;
+                }
+            }
+        }
+        if (blocksLength != params.curve.relativeAmounts.length) {
+            revert InvalidDecayCurve();
+        }
+
         // handle current block before decay or no decay
         if (params.decayStartBlock >= params.blockNumberish || params.curve.relativeAmounts.length == 0) {
             return params.startAmount.bound(params.minAmount, params.maxAmount);
