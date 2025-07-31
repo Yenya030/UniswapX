@@ -1,3 +1,4 @@
+
 # Tested Attack Vectors
 
 This document tracks the security vectors evaluated via unit tests.
@@ -139,3 +140,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Summary**: Attempt to reuse a cosigner signature on a different chain when executing a `V3DutchOrder`.
 - **Result**: The reactor rejects the transaction. The cosigner digest includes `block.chainid`, binding the signature to a specific chain.
 - **Validation**: `forge test --match-path test/reactors/V3DutchOrderChainReplay.t.sol` passes, confirming the protection.
+
+
+## Cosigner Output Override
+- **Description**: Confirm that cosigner-provided output amounts in `V2DutchOrder` correctly override the swapper signed values.
+- **Test**: `V2DutchOrderOutputOverrideTest.test_outputOverrideBug` fills an order where the cosigner specifies a higher output amount.
+- **Result**: No bug – the swapper receives the cosigned amount, proving the override logic functions.
