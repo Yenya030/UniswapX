@@ -169,3 +169,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `DutchOrder` where an output recipient is the zero address.
 - **Test:** `DutchOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
 - **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation.
+
+
+## Limit Order With Zero Input
+- **Vector:** Execute a `LimitOrder` where the input token is the zero address and amount is zero.
+- **Result:** Order executes and the filler sends output tokens but receives no input because transferring from the zero address succeeds with no effect.
+- **Status:** **Bug discovered** – see `testExecuteZeroInput` in `LimitOrderReactorZeroInput.t.sol`.
