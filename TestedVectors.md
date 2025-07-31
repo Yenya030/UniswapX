@@ -158,3 +158,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute an `ExclusiveDutchOrder` where the `outputs` array is empty.
 - **Result:** Order executes successfully, transferring the swapper's input tokens to the filler without providing any output tokens. The absence of validation allows trivial token theft.
 - **Status:** **Bug discovered** – see `testExecuteNoOutputs` in `ExclusiveDutchOrderReactorZeroOutputs.t.sol`.
+
+
+## Limit Order With Zero Input
+- **Vector:** Execute a `LimitOrder` where the input token is the zero address and amount is zero.
+- **Result:** Order executes and the filler sends output tokens but receives no input because transferring from the zero address succeeds with no effect.
+- **Status:** **Bug discovered** – see `testExecuteZeroInput` in `LimitOrderReactorZeroInput.t.sol`.
