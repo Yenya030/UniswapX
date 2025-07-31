@@ -6,11 +6,6 @@ This document tracks the security vectors evaluated via unit tests.
 - **Summary**: Attempt to reuse a cosigner signature on a different chain when executing a `V2DutchOrder`.
 - **Result**: The reactor rejects the transaction. The cosigner digest includes `block.chainid`, binding the signature to a specific chain.
 - **Validation**: `forge test --match-path test/reactors/V2DutchOrderChainReplay.t.sol` passes, confirming the protection.
-## V3 cross-chain cosigner signature replay
-- **Summary**: Attempt to reuse a cosigner signature on a different chain when executing a `V3DutchOrder`.
-- **Result**: The reactor rejects the transaction. The cosigner digest includes `block.chainid`, binding the signature to a specific chain.
-- **Validation**: `forge test --match-path test/reactors/V3DutchOrderChainReplay.t.sol` passes, confirming the protection.
-
 
 ## Reentrancy via chained reactor execution
 - **Summary**: A fill contract tries to execute another reactor within its callback, potentially leading to reentrancy issues.
@@ -138,3 +133,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `LimitOrder` where the output recipient is the zero address.
 - **Test:** `LimitOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
 - **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, demonstrating missing validation for recipient addresses.
+
+
+## V3 cross-chain cosigner signature replay
+- **Summary**: Attempt to reuse a cosigner signature on a different chain when executing a `V3DutchOrder`.
+- **Result**: The reactor rejects the transaction. The cosigner digest includes `block.chainid`, binding the signature to a specific chain.
+- **Validation**: `forge test --match-path test/reactors/V3DutchOrderChainReplay.t.sol` passes, confirming the protection.
