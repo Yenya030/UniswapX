@@ -1,3 +1,4 @@
+
 # Tested Attack Vectors
 
 This document tracks the security vectors evaluated via unit tests.
@@ -122,6 +123,25 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: The reactor refunds any ETH balance to the filler after execution. If the filler contract refuses ETH, this refund reverts and halts order execution. An attacker can send ETH to the reactor to block such fillers.
 - **Test**: `EthOutputNoReceiveTest.testRefundToNonPayableReverts` deploys a `MockFillContractNoReceive` without a payable fallback. After sending stray ETH to the reactor, executing an order reverts with `NativeTransferFailed`.
 - **Result**: **Bug discovered** – leftover ETH can be used to grief non-payable fillers.
+
+## V2DutchOrder cosigner output override ignored
+- **Description**: Suspected that `CosignerData.outputAmounts` might not update `baseOutputs` in `V2DutchOrderReactor` because the update function does not explicitly write back to the array.
+- **Test**: `V2DutchOrderOutputOverrideBugTest.testOutputOverrideIgnored` signs an order with a higher cosigned output amount. The swapper receives the higher amount, proving the override logic works.
+- **Result**: No bug – the memory reference updates the array correctly so cosigner overrides are honored.
+
+
+## Zero Recipient Output
+- **Vector:** Execute a `LimitOrder` where the output recipient is the zero address.
+- **Test:** `LimitOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
+- **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, demonstrating missing validation for recipient addresses.
+
+
+## V3 cross-chain cosigner signature replay
+- **Summary**: Attempt to reuse a cosigner signature on a different chain when executing a `V3DutchOrder`.
+- **Result**: The reactor rejects the transaction. The cosigner digest includes `block.chainid`, binding the signature to a specific chain.
+- **Validation**: `forge test --match-path test/reactors/V3DutchOrderChainReplay.t.sol` passes, confirming the protection.
+
+
 ## Cosigner Output Override
 - **Description**: Confirm that cosigner-provided output amounts in `V2DutchOrder` correctly override the swapper signed values.
 - **Test**: `V2DutchOrderOutputOverrideTest.test_outputOverrideBug` fills an order where the cosigner specifies a higher output amount.
