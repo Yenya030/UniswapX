@@ -122,3 +122,7 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: The reactor refunds any ETH balance to the filler after execution. If the filler contract refuses ETH, this refund reverts and halts order execution. An attacker can send ETH to the reactor to block such fillers.
 - **Test**: `EthOutputNoReceiveTest.testRefundToNonPayableReverts` deploys a `MockFillContractNoReceive` without a payable fallback. After sending stray ETH to the reactor, executing an order reverts with `NativeTransferFailed`.
 - **Result**: **Bug discovered** – leftover ETH can be used to grief non-payable fillers.
+## Cosigner Output Override
+- **Description**: Confirm that cosigner-provided output amounts in `V2DutchOrder` correctly override the swapper signed values.
+- **Test**: `V2DutchOrderOutputOverrideTest.test_outputOverrideBug` fills an order where the cosigner specifies a higher output amount.
+- **Result**: No bug – the swapper receives the cosigned amount, proving the override logic functions.
