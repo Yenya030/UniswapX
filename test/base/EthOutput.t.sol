@@ -473,4 +473,22 @@ contract EthOutputDirectFillerTest is Test, PermitSignature, DeployPermit2 {
         assertEq(directFiller.balance, ONE);
         assertEq(address(reactor).balance, 0);
     }
+
+    /// @dev Draining stray ETH via empty executeBatch
+    function testEmptyBatchRefundsLeftoverEth() public {
+        // Deposit 1 ether to the reactor from an unrelated address
+        address stranger = address(9999);
+        vm.deal(stranger, ONE);
+        vm.prank(stranger);
+        address(reactor).call{value: ONE}("");
+
+        // Execute an empty batch to claim the stray ETH
+        SignedOrder[] memory orders = new SignedOrder[](0);
+        address filler = address(1111);
+        vm.prank(filler);
+        reactor.executeBatch(orders);
+
+        assertEq(filler.balance, ONE);
+        assertEq(address(reactor).balance, 0);
+    }
 }

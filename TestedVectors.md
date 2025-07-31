@@ -122,3 +122,7 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: The reactor refunds any ETH balance to the filler after execution. If the filler contract refuses ETH, this refund reverts and halts order execution. An attacker can send ETH to the reactor to block such fillers.
 - **Test**: `EthOutputNoReceiveTest.testRefundToNonPayableReverts` deploys a `MockFillContractNoReceive` without a payable fallback. After sending stray ETH to the reactor, executing an order reverts with `NativeTransferFailed`.
 - **Result**: **Bug discovered** – leftover ETH can be used to grief non-payable fillers.
+## Leftover ETH Drain via Empty Batch
+- **Description**: Anyone can reclaim stray ETH by calling `executeBatch` with an empty array, causing the reactor to refund its entire balance to the caller.
+- **Test**: `EthOutputTest.testEmptyBatchRefundsLeftoverEth` sends ETH to the reactor then executes an empty batch, receiving the deposit back.
+- **Result**: **Bug discovered** – reactor exposes a simple ETH drain even without valid orders.
