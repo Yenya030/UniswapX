@@ -127,3 +127,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: Suspected that `CosignerData.outputAmounts` might not update `baseOutputs` in `V2DutchOrderReactor` because the update function does not explicitly write back to the array.
 - **Test**: `V2DutchOrderOutputOverrideBugTest.testOutputOverrideIgnored` signs an order with a higher cosigned output amount. The swapper receives the higher amount, proving the override logic works.
 - **Result**: No bug – the memory reference updates the array correctly so cosigner overrides are honored.
+
+
+## Zero Recipient Output
+- **Vector:** Execute a `LimitOrder` where the output recipient is the zero address.
+- **Test:** `LimitOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
+- **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, demonstrating missing validation for recipient addresses.
