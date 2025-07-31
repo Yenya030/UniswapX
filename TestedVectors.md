@@ -146,3 +146,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: Confirm that cosigner-provided output amounts in `V2DutchOrder` correctly override the swapper signed values.
 - **Test**: `V2DutchOrderOutputOverrideTest.test_outputOverrideBug` fills an order where the cosigner specifies a higher output amount.
 - **Result**: No bug – the swapper receives the cosigned amount, proving the override logic functions.
+
+
+## Leftover ETH Drain via Empty Batch
+- **Description**: Anyone can reclaim stray ETH by calling `executeBatch` with an empty array, causing the reactor to refund its entire balance to the caller.
+- **Test**: `EthOutputTest.testEmptyBatchRefundsLeftoverEth` sends ETH to the reactor then executes an empty batch, receiving the deposit back.
+- **Result**: **Bug discovered** – reactor exposes a simple ETH drain even without valid orders.
