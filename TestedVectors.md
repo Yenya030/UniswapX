@@ -122,3 +122,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: The reactor refunds any ETH balance to the filler after execution. If the filler contract refuses ETH, this refund reverts and halts order execution. An attacker can send ETH to the reactor to block such fillers.
 - **Test**: `EthOutputNoReceiveTest.testRefundToNonPayableReverts` deploys a `MockFillContractNoReceive` without a payable fallback. After sending stray ETH to the reactor, executing an order reverts with `NativeTransferFailed`.
 - **Result**: **Bug discovered** – leftover ETH can be used to grief non-payable fillers.
+
+## Zero Recipient Output
+- **Vector:** Execute a `LimitOrder` where the output recipient is the zero address.
+- **Test:** `LimitOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
+- **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, demonstrating missing validation for recipient addresses.
