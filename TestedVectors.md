@@ -118,6 +118,11 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Result:** Order executes successfully, transferring the swapper's input tokens to the filler without providing any output tokens. The absence of validation allows trivial token theft.
 - **Status:** **Bug discovered** – see `testExecuteNoOutputs` in `PriorityOrderReactorZeroOutputs.t.sol`.
 
+## Exclusive Dutch Order With No Outputs
+- **Vector:** Execute an `ExclusiveDutchOrder` where the `outputs` array is empty.
+- **Result:** Order executes successfully, transferring the swapper's input tokens to the filler without providing any output tokens. The absence of validation allows trivial token theft.
+- **Status:** **Bug discovered** – see `testExecuteNoOutputs` in `ExclusiveDutchOrderReactorZeroOutputs.t.sol`.
+
 
 ## Leftover ETH refund to non-payable filler
 - **Description**: The reactor refunds any ETH balance to the filler after execution. If the filler contract refuses ETH, this refund reverts and halts order execution. An attacker can send ETH to the reactor to block such fillers.
