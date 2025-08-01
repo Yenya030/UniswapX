@@ -227,3 +227,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
 - **Test:** `PriorityOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
 - **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation.
+
+## Expired Limit Order
+- **Vector:** Attempt to execute a `LimitOrder` whose deadline has already passed.
+- **Test:** `LimitOrderReactorExpiredDeadlineTest.testExecuteExpiredDeadline` expects the call to revert with `SignatureExpired` due to the expired Permit2 signature.
+- **Result:** No bug – the reactor reverts, proving deadline enforcement works.
