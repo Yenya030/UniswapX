@@ -195,3 +195,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `PriorityOrder` where the input token is the zero address and amount is zero.
 - **Test:** `PriorityOrderReactorZeroInputTest.testExecuteZeroInput` demonstrates that the order executes without transferring any input tokens.
 - **Result:** **Bug discovered** – filler provides output tokens while receiving no input due to missing validation.
+
+
+## Reentrancy via ERC777 token callback
+- **Vector:** Use an ERC777-style token that attempts to reenter a reactor during `transferFrom` via a callback.
+- **Test:** `LimitOrderReactorTokenReentrancyTest.testReentrancyDuringTransferFrom` uses `MockERC777Reentrant` which calls back into the reactor attempting to execute a batch.
+- **Result:** The transaction reverts with `TRANSFER_FROM_FAILED`, showing that reentrancy during token transfer is blocked.
