@@ -112,6 +112,12 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test**: `testScaleInputPriorityFeeOverflow` in `test/lib/PriorityFeeLib.t.sol` uses a huge `priorityFee` that should zero out the input but instead returns the original amount.
 - **Result**: **Bug discovered** – unchecked multiplication allows overflow leading to incorrect scaling.
 
+## Priority Fee Output Overflow
+- **Description**: Output scaling in `PriorityFeeLib` multiplies `priorityFee` by `mpsPerPriorityFeeWei`. Providing an extremely large priority fee triggers an arithmetic overflow panic.
+- **Test**: `testScaleOutputPriorityFeeOverflow` in `test/lib/PriorityFeeLibOutputOverflow.t.sol` uses a huge priority fee and observes the panic.
+- **Result**: **Bug discovered** – overflow causes a panic instead of graceful scaling.
+
+
 
 ## Priority Order With No Outputs
 - **Vector:** Execute a `PriorityOrder` where the `outputs` array is empty.
