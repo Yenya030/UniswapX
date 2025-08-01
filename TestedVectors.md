@@ -85,6 +85,11 @@ This document tracks manual fuzzing and unit tests exploring potential vulnerabi
 - **Vector**: Verify that `_prepare` does not mutate caller-provided memory while still injecting protocol fee outputs correctly.
 - **Test**: `BaseReactorTest.test_base_prepareFeeOutputsVanishing` (existing) confirms the input array is unchanged while fees are applied internally.
 - **Result**: No bug – protocol fee logic works as intended.
+## Protocol Fee Injection Not Persisting
+- **Description:** Suspected that `_prepare` might fail to persist protocol fee outputs because each order is loaded into a temporary variable before calling `_injectFees`.
+- **Test:** `BaseReactorTest.test_base_prepareFeeOutputsVanishing` calls `_prepare` via `MockPrepareReactor` and shows the returned orders include the fee output while the original array remains unchanged.
+- **Result:** No bug – memory references ensure that `_prepare` updates the passed array correctly, so fees persist into the fill step.
+
 
 
 ## OrderQuoter Token Theft Attempt
