@@ -227,3 +227,13 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
 - **Test:** `PriorityOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
 - **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation.
+
+## V2 Dutch Order With No Outputs
+- **Vector:** Execute a `V2DutchOrder` where the `baseOutputs` array is empty.
+- **Test:** `V2DutchOrderReactorZeroOutputsTest.testExecuteNoOutputs` mints input tokens to the swapper and executes the order. The filler receives the input tokens and no outputs are produced.
+- **Result:** **Bug discovered** – the contract lacks validation and transfers the swapper's tokens to the filler without any corresponding outputs.
+
+## V3 Dutch Order With No Outputs
+- **Vector:** Execute a `V3DutchOrder` where the `baseOutputs` array is empty.
+- **Test:** `V3DutchOrderReactorZeroOutputsTest.testExecuteNoOutputs` demonstrates that the filler keeps the input tokens since no outputs are specified.
+- **Result:** **Bug discovered** – orders without outputs execute successfully, allowing trivial theft of the swapper's tokens.
