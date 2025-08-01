@@ -297,3 +297,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Suspected that `_updateWithCosignerAmounts` might not persist cosigner output overrides due to copying to a memory variable.
 - **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.
 - **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
+
+## Leftover ERC20 Tokens
+- **Vector:** Deposit ERC20 tokens directly to a reactor and execute an order to see if the filler can claim them.
+- **Test:** `EthOutputMockFillContractTest.testLeftoverErc20TokensRemain` sends stray tokens to the reactor, then fills an unrelated order.
+- **Result:** No bug – the tokens stay in the reactor after execution rather than being refunded or drained.

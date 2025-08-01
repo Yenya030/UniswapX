@@ -491,4 +491,33 @@ contract EthOutputDirectFillerTest is Test, PermitSignature, DeployPermit2 {
         assertEq(filler.balance, ONE);
         assertEq(address(reactor).balance, 0);
     }
+
+    /// @dev ERC20 tokens sent directly to the reactor remain stuck
+    function testLeftoverErc20TokensRemain() public {
+        // deposit stray ERC20 to reactor
+        address stranger = address(9999);
+        tokenOut1.mint(stranger, ONE);
+        vm.prank(stranger);
+        tokenOut1.transfer(address(reactor), ONE);
+
+        uint256 inputAmount = ONE;
+        tokenIn1.mint(address(swapper1), inputAmount);
+        tokenIn1.forceApprove(swapper1, address(permit2), inputAmount);
+        vm.deal(directFiller, ONE);
+
+        DutchOrder memory order = DutchOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper1).withDeadline(block.timestamp + 100),
+            decayStartTime: block.timestamp,
+            decayEndTime: block.timestamp + 100,
+            input: DutchInput(tokenIn1, inputAmount, inputAmount),
+            outputs: OutputsBuilder.singleDutch(NATIVE, ONE, ONE, swapper1)
+        });
+
+        vm.prank(directFiller);
+        reactor.execute{value: ONE}(SignedOrder(abi.encode(order), signOrder(swapperPrivateKey1, address(permit2), order)));
+
+        // stray ERC20 stays in the reactor
+        assertEq(tokenOut1.balanceOf(address(reactor)), ONE);
+        assertEq(tokenOut1.balanceOf(directFiller), 0);
+    }
 }
