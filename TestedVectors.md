@@ -185,3 +185,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test:** `test_base_nonceReuseAcrossReactors` in `BaseReactor.t.sol` executes an order on one reactor then attempts to fill another order with the same nonce on a second reactor.
 - **Result:** The second fill reverts with `InvalidNonce`, showing nonces are globally enforced.
 
+
+## Reentrancy via ERC777 token callback
+- **Vector:** Use an ERC777-style token that attempts to reenter a reactor during `transferFrom` via a callback.
+- **Test:** `LimitOrderReactorTokenReentrancyTest.testReentrancyDuringTransferFrom` uses `MockERC777Reentrant` which calls back into the reactor attempting to execute a batch.
+- **Result:** The transaction reverts with `TRANSFER_FROM_FAILED`, showing that reentrancy during token transfer is blocked.
