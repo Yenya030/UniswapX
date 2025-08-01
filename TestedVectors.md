@@ -185,3 +185,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test:** `test_base_nonceReuseAcrossReactors` in `BaseReactor.t.sol` executes an order on one reactor then attempts to fill another order with the same nonce on a second reactor.
 - **Result:** The second fill reverts with `InvalidNonce`, showing nonces are globally enforced.
 
+
+## Exclusivity Override Overflow
+- **Vector:** Provide `exclusivityOverrideBps` equal to `type(uint256).max` when calling `ExclusivityLib.handleExclusiveOverrideTimestamp`.
+- **Test:** `ExclusivityLibOverflowTest.testExclusivityOverrideBpsOverflow` expects an arithmetic overflow revert for this input.
+- **Result:** The library reverts with an arithmetic error, showing overflow protection is in place.
