@@ -266,3 +266,7 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: Attempt to reenter a reactor during `additionalValidationContract.validate`.
 - **Test**: `LimitOrderReactorValidationReentrancyTest.testValidationReentrancy` deploys `MockValidationContractReentrant` which tries to call `execute` inside `validate` using `staticcall`.
 - **Result**: The call fails and the transaction reverts with `"call failed"`, showing the view restriction prevents reentrancy.
+## V3 Gas Adjustment Overflow
+- **Description:** Provide a `V3DutchOrder` with `adjustmentPerGweiBaseFee` set to `1 << 255` and a lower current base fee so the gas delta underflows.
+- **Test:** `V3DutchOrderGasOverflowTest.testGasAdjustmentOverflow` creates such an order and executes it.
+- **Result:** The transaction reverts due to arithmetic overflow when applying the gas adjustment, showing extreme values are unsafe.
