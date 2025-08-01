@@ -6,7 +6,7 @@ import {LimitOrder} from "../../src/lib/LimitOrderLib.sol";
 import {OutputsBuilder} from "../util/OutputsBuilder.sol";
 import {InputToken, OrderInfo, SignedOrder} from "../../src/base/ReactorStructs.sol";
 import {OrderInfoBuilder} from "../util/OrderInfoBuilder.sol";
-import {OrderQuoterTest} from "../lib/OrderQuoter.t.sol";
+import {OrderQuoterTest, SignatureExpired} from "../lib/OrderQuoter.t.sol";
 
 contract LimitOrderReactorExpiredDeadlineTest is LimitOrderReactorTest {
     using OrderInfoBuilder for OrderInfo;
@@ -20,7 +20,7 @@ contract LimitOrderReactorExpiredDeadlineTest is LimitOrderReactorTest {
             outputs: OutputsBuilder.single(address(tokenOut), ONE, swapper)
         });
         bytes memory sig = signOrder(swapperPrivateKey, address(permit2), order);
-        vm.expectRevert(abi.encodeWithSelector(OrderQuoterTest.SignatureExpired.selector, deadline));
+        vm.expectRevert(abi.encodeWithSelector(SignatureExpired.selector, deadline));
         fillContract.execute(SignedOrder(abi.encode(order), sig));
     }
 }

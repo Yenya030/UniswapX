@@ -224,9 +224,16 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Result:** The library reverts with an arithmetic error, showing overflow protection is in place.
 
 ## Limit Order With Native Input Amount
+
+
 - **Vector:** Execute a `LimitOrder` where the input token is the zero address but the amount is non‑zero.
 - **Test:** `LimitOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` demonstrates the filler transfers output tokens while receiving no input due to missing validation.
 - **Result:** **Bug discovered** – filler loses tokens because the contract does not reject native input orders.
+## Dutch Order With Native Input Amount
+- **Vector:** Execute a `DutchOrder` where the input token is the zero address and the amount is non-zero.
+- **Test:** `DutchOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` expects a revert with `TRANSFER_FROM_FAILED`, showing the invalid native input is rejected.
+- **Result:** No bug – the transaction reverts, so fillers cannot be tricked into losing tokens.
+
 
 ## Priority Order With Zero Recipient
 - **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
