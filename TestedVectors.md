@@ -212,3 +212,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Provide `exclusivityOverrideBps` equal to `type(uint256).max` when calling `ExclusivityLib.handleExclusiveOverrideTimestamp`.
 - **Test:** `ExclusivityLibOverflowTest.testExclusivityOverrideBpsOverflow` expects an arithmetic overflow revert for this input.
 - **Result:** The library reverts with an arithmetic error, showing overflow protection is in place.
+
+## Limit Order With Native Input Amount
+- **Vector:** Execute a `LimitOrder` where the input token is the zero address but the amount is non‑zero.
+- **Test:** `LimitOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` demonstrates the filler transfers output tokens while receiving no input due to missing validation.
+- **Result:** **Bug discovered** – filler loses tokens because the contract does not reject native input orders.
