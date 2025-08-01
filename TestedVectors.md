@@ -297,3 +297,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Suspected that `_updateWithCosignerAmounts` might not persist cosigner output overrides due to copying to a memory variable.
 - **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.
 - **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
+
+## Expired Limit Order With Zero Input
+- **Vector:** Fill a `LimitOrder` with no input tokens and an expired deadline.
+- **Test:** `LimitOrderReactorZeroInputExpiredDeadlineTest.testExecuteExpiredDeadlineZeroInput` executes such an order.
+- **Result:** Order still executes successfully because Permit2 validation is skipped, demonstrating deadlines are ignored when input amount is zero.
+
