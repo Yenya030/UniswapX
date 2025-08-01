@@ -201,3 +201,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Use an ERC777-style token that attempts to reenter a reactor during `transferFrom` via a callback.
 - **Test:** `LimitOrderReactorTokenReentrancyTest.testReentrancyDuringTransferFrom` uses `MockERC777Reentrant` which calls back into the reactor attempting to execute a batch.
 - **Result:** The transaction reverts with `TRANSFER_FROM_FAILED`, showing that reentrancy during token transfer is blocked.
+
+
+## Exclusivity Override Overflow
+- **Vector:** Provide `exclusivityOverrideBps` equal to `type(uint256).max` when calling `ExclusivityLib.handleExclusiveOverrideTimestamp`.
+- **Test:** `ExclusivityLibOverflowTest.testExclusivityOverrideBpsOverflow` expects an arithmetic overflow revert for this input.
+- **Result:** The library reverts with an arithmetic error, showing overflow protection is in place.
