@@ -1,4 +1,5 @@
 
+
 # Tested Attack Vectors
 
 This document tracks the security vectors evaluated via unit tests.
@@ -297,6 +298,21 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Suspected that `_updateWithCosignerAmounts` might not persist cosigner output overrides due to copying to a memory variable.
 - **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.
 - **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
+
+## Native Output Sent to Reactor
+- **Vector:** Execute a `DutchOrder` where an output uses the native token and designates the reactor itself as the recipient.
+- **Test:** `DutchOrderReactorReactorRecipientTest.testReactorRecipientRefundsFiller` executes such an order. The fill contract deposits ETH during the callback, but `_fill` refunds the reactor balance back to the filler because the recipient equals the reactor.
+- **Result:** Order completes without reverting and the filler receives the ETH meant for the reactor, demonstrating missing validation for the reactor address as an output recipient.
+
+## Protocol Fee Injection Persistence
+- **Vector:** Suspected that protocol fee outputs injected during `_prepare` would vanish because each order is copied into a temporary memory variable.
+- **Test:** `BaseReactor.prepareOrders` in `MockPrepareReactor` returns the mutated orders. `test_base_prepareFeeOutputsVanishing` checks that the prepared orders include the fee outputs while the original array does not.
+- **Result:** No bug – the mutation persists within the `orders` array used for execution, so protocol fees are applied as expected.
+
+## Expired Limit Order With Zero Input
+- **Vector:** Fill a `LimitOrder` with no input tokens and an expired deadline.
+- **Test:** `LimitOrderReactorZeroInputExpiredDeadlineTest.testExecuteExpiredDeadlineZeroInput` executes such an order.
+- **Result:** Order still executes successfully because Permit2 validation is skipped, demonstrating deadlines are ignored when input amount is zero.
 
 ## Leftover ERC20 Tokens
 - **Vector:** Deposit ERC20 tokens directly to a reactor and execute an order to see if the filler can claim them.
