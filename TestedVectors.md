@@ -256,3 +256,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Use an ERC777-style token as an order output that attempts to reenter the reactor during `transferFrom` via a callback.
 - **Test:** `LimitOrderReactorOutputTokenReentrancyTest.testReentrancyDuringOutputTransfer` transfers such a token to the filler, which then reenters the reactor.
 - **Result:** The transaction reverts with `TRANSFER_FROM_FAILED`, demonstrating that reentrancy during output transfer is blocked.
+
+## Reentrancy via Validation Contract
+- **Description**: Attempt to reenter a reactor during `additionalValidationContract.validate`.
+- **Test**: `LimitOrderReactorValidationReentrancyTest.testValidationReentrancy` deploys `MockValidationContractReentrant` which tries to call `execute` inside `validate` using `staticcall`.
+- **Result**: The call fails and the transaction reverts with `"call failed"`, showing the view restriction prevents reentrancy.
