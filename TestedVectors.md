@@ -240,6 +240,11 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test:** `PriorityOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
 - **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation.
 
+## Priority Order Expired Deadline
+- **Vector:** Execute a `PriorityOrder` where the `deadline` timestamp has already passed.
+- **Test:** `PriorityOrderReactorExpiredDeadlineTest.testExecuteExpiredDeadline` submits such an order and expects a revert.
+- **Result:** The transaction reverts with `InvalidDeadline`, proving expired orders cannot be filled.
+
 ## Priority Fee Scaling Overflow
 - **Description**: Provide a `PriorityOrder` with `mpsPerPriorityFeeWei` set near `uint256` max so that multiplying by the priority fee would overflow.
 - **Test**: `PriorityOrderOverflowTest.testInputScaleOverflow` sets `mpsPerPriorityFeeWei` to `type(uint256).max` and expects a revert when executing the order.
