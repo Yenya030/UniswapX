@@ -201,6 +201,11 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test:** `PriorityOrderReactorZeroInputTest.testExecuteZeroInput` demonstrates that the order executes without transferring any input tokens.
 - **Result:** **Bug discovered** – filler provides output tokens while receiving no input due to missing validation.
 
+## Priority Order With Zero Recipient
+- **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
+- **Test:** `PriorityOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
+- **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation.
+
 
 ## Reentrancy via ERC777 token callback
 - **Vector:** Use an ERC777-style token that attempts to reenter a reactor during `transferFrom` via a callback.
