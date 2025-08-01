@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.0;
+error SignatureExpired(uint256 deadline);
 
 import {Test} from "forge-std/Test.sol";
 import {OrderInfo, InputToken, ResolvedOrder} from "../../src/base/ReactorStructs.sol";
@@ -26,7 +27,6 @@ contract OrderQuoterTest is Test, PermitSignature, ReactorEvents, DeployPermit2 
     uint256 constant ONE = 10 ** 18;
     address constant PROTOCOL_FEE_OWNER = address(1);
 
-    error SignatureExpired(uint256 deadline);
 
     OrderQuoter quoter;
     MockERC20 tokenIn;
