@@ -229,6 +229,11 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `LimitOrder` where the input token is the zero address but the amount is non‑zero.
 - **Test:** `LimitOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` demonstrates the filler transfers output tokens while receiving no input due to missing validation.
 - **Result:** **Bug discovered** – filler loses tokens because the contract does not reject native input orders.
+
+## Limit Order With ERC20 Zero Input Amount
+- **Vector:** Execute a `LimitOrder` where the input token is a valid ERC20 but the amount is zero.
+- **Test:** `LimitOrderReactorERC20ZeroAmountTest.testExecuteERC20ZeroAmount` shows the filler transfers output tokens while receiving no input.
+- **Result:** **Bug discovered** – orders with zero ERC20 input amount succeed, enabling trivial token theft.
 ## Dutch Order With Native Input Amount
 - **Vector:** Execute a `DutchOrder` where the input token is the zero address and the amount is non-zero.
 - **Test:** `DutchOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` expects a revert with `TRANSFER_FROM_FAILED`, showing the invalid native input is rejected.
