@@ -227,7 +227,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
 - **Test:** `PriorityOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
 - **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation.
-\n## Priority Fee Scaling Overflow
+
+## Priority Fee Scaling Overflow
 - **Description**: Provide a `PriorityOrder` with `mpsPerPriorityFeeWei` set near `uint256` max so that multiplying by the priority fee would overflow.
 - **Test**: `PriorityOrderOverflowTest.testInputScaleOverflow` sets `mpsPerPriorityFeeWei` to `type(uint256).max` and expects a revert when executing the order.
 - **Result**: No bug – the overflow triggers a revert, so unsafe values cannot be exploited.
