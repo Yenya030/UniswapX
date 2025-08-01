@@ -227,3 +227,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
 - **Test:** `PriorityOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
 - **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation.
+
+## Nonlinear Dutch Order with Large Relative Block Value
+- **Description**: Provide a `NonlinearDutchDecay` curve where `relativeBlocks` contains a value greater than `uint16.max`.
+- **Test**: `NonlinearDutchDecayLargeBlockTest.testLargeRelativeBlockHandled` crafts such a curve and confirms the library computes a decayed amount without reverting.
+- **Result**: No bug – the curve is accepted and processed normally.
