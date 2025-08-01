@@ -1,4 +1,5 @@
 
+
 # Tested Attack Vectors
 
 This document tracks the security vectors evaluated via unit tests.
@@ -307,3 +308,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Suspected that protocol fee outputs injected during `_prepare` would vanish because each order is copied into a temporary memory variable.
 - **Test:** `BaseReactor.prepareOrders` in `MockPrepareReactor` returns the mutated orders. `test_base_prepareFeeOutputsVanishing` checks that the prepared orders include the fee outputs while the original array does not.
 - **Result:** No bug – the mutation persists within the `orders` array used for execution, so protocol fees are applied as expected.
+
+## Expired Limit Order With Zero Input
+- **Vector:** Fill a `LimitOrder` with no input tokens and an expired deadline.
+- **Test:** `LimitOrderReactorZeroInputExpiredDeadlineTest.testExecuteExpiredDeadlineZeroInput` executes such an order.
+- **Result:** Order still executes successfully because Permit2 validation is skipped, demonstrating deadlines are ignored when input amount is zero.
