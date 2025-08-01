@@ -165,6 +165,11 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Result:** Order executes successfully, transferring the swapper's input tokens to the filler without providing any output tokens. The absence of validation allows trivial token theft.
 - **Status:** **Bug discovered** – see `testExecuteNoOutputs` in `ExclusiveDutchOrderReactorZeroOutputs.t.sol`.
 
+## Exclusive Dutch Order With Zero Input
+- **Vector:** Execute an `ExclusiveDutchOrder` where the input token is the zero address and amount is zero.
+- **Test:** `ExclusiveDutchOrderReactorZeroInputTest.testExecuteZeroInput` shows the order executes while the filler provides outputs without receiving any input.
+- **Status:** **Bug discovered** – input validation is missing.
+
 ## UniversalRouterExecutor leftover approvals
 - **Description**: The `UniversalRouterExecutor` permanently approves Permit2 to spend tokens during `reactorCallback`. A malicious router could later drain tokens via Permit2.
 - **Test**: `UniversalRouterExecutorAllowanceAttackTest.testFillerCanDrainApprovedTokens` confirms the approval remains after callback.
