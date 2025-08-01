@@ -112,6 +112,12 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test**: `testScaleInputPriorityFeeOverflow` in `test/lib/PriorityFeeLib.t.sol` uses a huge `priorityFee` that should zero out the input but instead returns the original amount.
 - **Result**: **Bug discovered** – unchecked multiplication allows overflow leading to incorrect scaling.
 
+## Priority Fee Output Overflow
+- **Description**: Output scaling in `PriorityFeeLib` multiplies `priorityFee` by `mpsPerPriorityFeeWei`. Providing an extremely large priority fee triggers an arithmetic overflow panic.
+- **Test**: `testScaleOutputPriorityFeeOverflow` in `test/lib/PriorityFeeLibOutputOverflow.t.sol` uses a huge priority fee and observes the panic.
+- **Result**: **Bug discovered** – overflow causes a panic instead of graceful scaling.
+
+
 
 ## Priority Order With No Outputs
 - **Vector:** Execute a `PriorityOrder` where the `outputs` array is empty.
@@ -184,6 +190,17 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Reuse the same Permit2 nonce for orders on different reactors.
 - **Test:** `test_base_nonceReuseAcrossReactors` in `BaseReactor.t.sol` executes an order on one reactor then attempts to fill another order with the same nonce on a second reactor.
 - **Result:** The second fill reverts with `InvalidNonce`, showing nonces are globally enforced.
+
+## Priority Order With Zero Input
+- **Vector:** Execute a `PriorityOrder` where the input token is the zero address and amount is zero.
+- **Test:** `PriorityOrderReactorZeroInputTest.testExecuteZeroInput` demonstrates that the order executes without transferring any input tokens.
+- **Result:** **Bug discovered** – filler provides output tokens while receiving no input due to missing validation.
+
+
+## Reentrancy via ERC777 token callback
+- **Vector:** Use an ERC777-style token that attempts to reenter a reactor during `transferFrom` via a callback.
+- **Test:** `LimitOrderReactorTokenReentrancyTest.testReentrancyDuringTransferFrom` uses `MockERC777Reentrant` which calls back into the reactor attempting to execute a batch.
+- **Result:** The transaction reverts with `TRANSFER_FROM_FAILED`, showing that reentrancy during token transfer is blocked.
 
 
 ## Exclusivity Override Overflow
