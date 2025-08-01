@@ -313,3 +313,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Fill a `LimitOrder` with no input tokens and an expired deadline.
 - **Test:** `LimitOrderReactorZeroInputExpiredDeadlineTest.testExecuteExpiredDeadlineZeroInput` executes such an order.
 - **Result:** Order still executes successfully because Permit2 validation is skipped, demonstrating deadlines are ignored when input amount is zero.
+
+## Leftover ERC20 Tokens
+- **Vector:** Deposit ERC20 tokens directly to a reactor and execute an order to see if the filler can claim them.
+- **Test:** `EthOutputMockFillContractTest.testLeftoverErc20TokensRemain` sends stray tokens to the reactor, then fills an unrelated order.
+- **Result:** No bug – the tokens stay in the reactor after execution rather than being refunded or drained.
