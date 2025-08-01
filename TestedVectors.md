@@ -179,3 +179,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `DutchOrder` where the input token is the zero address and amount is zero.
 - **Result:** Order executes successfully, transferring output tokens without receiving any input due to the empty token address transfer succeeding.
 - **Status:** **Bug discovered** – see `testExecuteZeroInput` in `DutchOrderReactorZeroInput.t.sol`.
+
+## Permit2 Nonce Reuse Across Reactors
+- **Vector:** Reuse the same Permit2 nonce for orders on different reactors.
+- **Test:** `test_base_nonceReuseAcrossReactors` in `BaseReactor.t.sol` executes an order on one reactor then attempts to fill another order with the same nonce on a second reactor.
+- **Result:** The second fill reverts with `InvalidNonce`, showing nonces are globally enforced.
+
