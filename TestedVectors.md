@@ -191,7 +191,6 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test:** `test_base_nonceReuseAcrossReactors` in `BaseReactor.t.sol` executes an order on one reactor then attempts to fill another order with the same nonce on a second reactor.
 - **Result:** The second fill reverts with `InvalidNonce`, showing nonces are globally enforced.
 
-
 ## Priority Order With Zero Input
 - **Vector:** Execute a `PriorityOrder` where the input token is the zero address and amount is zero.
 - **Test:** `PriorityOrderReactorZeroInputTest.testExecuteZeroInput` demonstrates that the order executes without transferring any input tokens.
