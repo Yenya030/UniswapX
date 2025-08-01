@@ -6,7 +6,9 @@ import {LimitOrder} from "../../src/lib/LimitOrderLib.sol";
 import {OutputsBuilder} from "../util/OutputsBuilder.sol";
 import {InputToken, OrderInfo, SignedOrder} from "../../src/base/ReactorStructs.sol";
 import {OrderInfoBuilder} from "../util/OrderInfoBuilder.sol";
-import {SignatureExpired} from "../lib/OrderQuoter.t.sol";
+
+// Re-declare the custom error locally to avoid importing a test contract
+error SignatureExpired(uint256 deadline);
 
 contract LimitOrderReactorExpiredDeadlineTest is LimitOrderReactorTest {
     using OrderInfoBuilder for OrderInfo;

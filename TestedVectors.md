@@ -247,3 +247,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `V3DutchOrder` where the `baseOutputs` array is empty.
 - **Test:** `V3DutchOrderReactorZeroOutputsTest.testExecuteNoOutputs` demonstrates that the filler keeps the input tokens since no outputs are specified.
 - **Result:** **Bug discovered** – orders without outputs execute successfully, allowing trivial theft of the swapper's tokens.
+
+## Reentrancy via Validation Contract
+- **Description**: Attempt to reenter a reactor during `additionalValidationContract.validate`.
+- **Test**: `LimitOrderReactorValidationReentrancyTest.testValidationReentrancy` deploys `MockValidationContractReentrant` which tries to call `execute` inside `validate` using `staticcall`.
+- **Result**: The call fails and the transaction reverts with `"call failed"`, showing the view restriction prevents reentrancy.
