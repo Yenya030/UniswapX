@@ -232,3 +232,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: Provide a `PriorityOrder` with `mpsPerPriorityFeeWei` set near `uint256` max so that multiplying by the priority fee would overflow.
 - **Test**: `PriorityOrderOverflowTest.testInputScaleOverflow` sets `mpsPerPriorityFeeWei` to `type(uint256).max` and expects a revert when executing the order.
 - **Result**: No bug – the overflow triggers a revert, so unsafe values cannot be exploited.
+
+## Nonlinear Dutch Order with Large Relative Block Value
+- **Description**: Provide a `NonlinearDutchDecay` curve where `relativeBlocks` contains a value greater than `uint16.max`.
+- **Test**: `NonlinearDutchDecayLargeBlockTest.testLargeRelativeBlockHandled` crafts such a curve and confirms the library computes a decayed amount without reverting.
+- **Result**: No bug – the curve is accepted and processed normally.
