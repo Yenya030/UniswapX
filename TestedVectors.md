@@ -318,3 +318,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Deposit ERC20 tokens directly to a reactor and execute an order to see if the filler can claim them.
 - **Test:** `EthOutputMockFillContractTest.testLeftoverErc20TokensRemain` sends stray tokens to the reactor, then fills an unrelated order.
 - **Result:** No bug – the tokens stay in the reactor after execution rather than being refunded or drained.
+## Native Output Reentrancy
+- **Vector:** Send native token output to a contract that reenters the reactor when receiving ETH.
+- **Test:** `LimitOrderReactorEthRecipientReentrancyTest.testReentrancyDuringNativeOutput` deploys `MockRecipientReentrant` which calls `executeBatch` in its receive function.
+- **Result:** The transaction reverts with `"ReentrancyGuard: reentrant call"`, showing ETH transfers cannot reenter the reactor.
+
