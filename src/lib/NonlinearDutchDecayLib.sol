@@ -56,11 +56,15 @@ library NonlinearDutchDecayLib {
             blocksLength = params.curve.relativeAmounts.length == 0 ? 0 : 1;
         } else {
             blocksLength = 1;
+            uint16 prev = uint16(packedBlocks);
             for (uint256 i = 1; i < 16; i++) {
-                if (uint16(packedBlocks >> (i * 16)) == 0) break;
+                uint16 curr = uint16(packedBlocks >> (i * 16));
+                if (curr == 0) break;
+                if (curr <= prev) revert InvalidDecayCurve();
                 unchecked {
                     ++blocksLength;
                 }
+                prev = curr;
             }
         }
         if (blocksLength != params.curve.relativeAmounts.length) {

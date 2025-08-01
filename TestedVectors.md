@@ -102,8 +102,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 
 ## Nonlinear Dutch Order with Unsorted Blocks
 - **Description**: Craft a `NonlinearDutchDecay` curve with `relativeBlocks` that are not strictly increasing.
-- **Test**: `NonlinearDutchDecayLibOutOfOrderTest.testOutOfOrderBlocks` executes such a curve and shows the decay increases to an unexpected amount instead of reverting.
-- **Result**: **Bug discovered** – library accepts out-of-order curves leading to unintuitive decayed values.
+- **Test**: `NonlinearDutchDecayLibOutOfOrderTest.testOutOfOrderBlocks` now expects `InvalidDecayCurve` when executing such a curve.
+- **Result**: No bug – the library reverts with `InvalidDecayCurve`, preventing out-of-order curves.
 
 
 ## Callback Order Mutation
@@ -224,9 +224,16 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Result:** The library reverts with an arithmetic error, showing overflow protection is in place.
 
 ## Limit Order With Native Input Amount
+
+
 - **Vector:** Execute a `LimitOrder` where the input token is the zero address but the amount is non‑zero.
 - **Test:** `LimitOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` demonstrates the filler transfers output tokens while receiving no input due to missing validation.
 - **Result:** **Bug discovered** – filler loses tokens because the contract does not reject native input orders.
+## Dutch Order With Native Input Amount
+- **Vector:** Execute a `DutchOrder` where the input token is the zero address and the amount is non-zero.
+- **Test:** `DutchOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` expects a revert with `TRANSFER_FROM_FAILED`, showing the invalid native input is rejected.
+- **Result:** No bug – the transaction reverts, so fillers cannot be tricked into losing tokens.
+
 
 ## Priority Order With Zero Recipient
 - **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
@@ -266,6 +273,10 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: Attempt to reenter a reactor during `additionalValidationContract.validate`.
 - **Test**: `LimitOrderReactorValidationReentrancyTest.testValidationReentrancy` deploys `MockValidationContractReentrant` which tries to call `execute` inside `validate` using `staticcall`.
 - **Result**: The call fails and the transaction reverts with `"call failed"`, showing the view restriction prevents reentrancy.
+## V3 Gas Adjustment Overflow
+- **Description:** Provide a `V3DutchOrder` with `adjustmentPerGweiBaseFee` set to `1 << 255` and a lower current base fee so the gas delta underflows.
+- **Test:** `V3DutchOrderGasOverflowTest.testGasAdjustmentOverflow` creates such an order and executes it.
+- **Result:** The transaction reverts due to arithmetic overflow when applying the gas adjustment, showing extreme values are unsafe.
 
 ## Exclusive Dutch Order With Zero Recipient
 - **Vector:** Execute an `ExclusiveDutchOrder` where an output recipient is the zero address.

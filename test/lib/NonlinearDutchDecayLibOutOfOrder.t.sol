@@ -21,7 +21,7 @@ contract NonlinearDutchDecayLibOutOfOrderTest is Test, BlockNumberish {
         NonlinearDutchDecay memory curve = CurveBuilder.multiPointCurve(blocks, amounts);
         V3DutchOutput memory output = V3DutchOutput(address(token), 3 ether, curve, address(this), 0, 0);
         vm.roll(150);
-        uint256 decayed = NonlinearDutchDecayLib.decay(output, 0, _getBlockNumberish()).amount;
-        emit log_uint(decayed);
+        vm.expectRevert(NonlinearDutchDecayLib.InvalidDecayCurve.selector);
+        NonlinearDutchDecayLib.decay(output, 0, _getBlockNumberish());
     }
 }
