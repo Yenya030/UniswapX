@@ -636,6 +636,56 @@ abstract contract BaseReactorTest is ReactorEvents, Test, DeployPermit2 {
         vm.snapshotGasLastCall("RevertInvalidNonce");
     }
 
+    /// @dev Nonce reuse across different reactors should fail
+    function test_base_nonceReuseAcrossReactors() public {
+        string memory reactorName = name();
+        bytes32 rHash = keccak256(bytes(reactorName));
+        if (rHash == keccak256(bytes("V2DutchOrder")) || rHash == keccak256(bytes("V3DutchOrder"))) {
+            return;
+        }
+        uint256 inputAmount = ONE;
+        uint256 outputAmount = ONE * 2;
+
+        BaseReactor otherReactor = createReactor();
+        MockFillContract otherFillContract = new MockFillContract(address(otherReactor));
+
+        tokenIn.mint(address(swapper), inputAmount * 2);
+        tokenOut.mint(address(fillContract), outputAmount);
+        tokenOut.mint(address(otherFillContract), outputAmount);
+        tokenIn.forceApprove(swapper, address(permit2), inputAmount * 2);
+
+        uint256 nonce = 555;
+        ResolvedOrder memory order1 = ResolvedOrder({
+            info: OrderInfoBuilder.init(address(reactor)).withSwapper(swapper).withDeadline(block.timestamp + 100).withNonce(
+                nonce
+            ),
+            input: InputToken(tokenIn, inputAmount, inputAmount),
+            outputs: OutputsBuilder.single(address(tokenOut), outputAmount, swapper),
+            sig: hex"00",
+            hash: bytes32(0)
+        });
+        ResolvedOrder memory order2 = ResolvedOrder({
+            info: OrderInfoBuilder.init(address(otherReactor)).withSwapper(swapper).withDeadline(block.timestamp + 100).withNonce(
+                nonce
+            ),
+            input: InputToken(tokenIn, inputAmount, inputAmount),
+            outputs: OutputsBuilder.single(address(tokenOut), outputAmount, swapper),
+            sig: hex"00",
+            hash: bytes32(0)
+        });
+
+        (SignedOrder memory signedOrder1,) = createAndSignOrder(order1);
+        (SignedOrder memory signedOrder2,) = createAndSignOrder(order2);
+
+        fillContract.execute(signedOrder1);
+
+        bytes4 revertData = keccak256(abi.encodePacked(name())) == keccak256(abi.encodePacked("PriorityOrderReactor"))
+            ? OrderAlreadyFilled.selector
+            : InvalidNonce.selector;
+        vm.expectRevert(revertData);
+        otherFillContract.execute(signedOrder2);
+    }
+
     /// @dev Test executing two orders on two reactors at once
     /// @dev executing the second order inside the callback of the first's execution
     function test_base_executeTwoReactorsAtOnce() public {
