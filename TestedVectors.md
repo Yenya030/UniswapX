@@ -303,6 +303,12 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `DutchOrder` where an output uses the native token and designates the reactor itself as the recipient.
 - **Test:** `DutchOrderReactorReactorRecipientTest.testReactorRecipientRefundsFiller` executes such an order. The fill contract deposits ETH during the callback, but `_fill` refunds the reactor balance back to the filler because the recipient equals the reactor.
 - **Result:** Order completes without reverting and the filler receives the ETH meant for the reactor, demonstrating missing validation for the reactor address as an output recipient.
+## ERC20 Output Sent to Reactor
+
+- **Vector:** Execute a `DutchOrder` where an ERC20 output designates the reactor as the recipient.
+- **Test:** `DutchOrderReactorERC20ReactorRecipientTest.testReactorRecipientKeepsERC20` fills such an order. The filler transfers the output token to the reactor and it remains there.
+- **Result:** Order completes and the reactor retains the ERC20 tokens, showing no validation against using the reactor as an output recipient.
+
 
 ## Protocol Fee Injection Persistence
 - **Vector:** Suspected that protocol fee outputs injected during `_prepare` would vanish because each order is copied into a temporary memory variable.
