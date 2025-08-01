@@ -237,3 +237,13 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: Provide a `NonlinearDutchDecay` curve where `relativeBlocks` contains a value greater than `uint16.max`.
 - **Test**: `NonlinearDutchDecayLargeBlockTest.testLargeRelativeBlockHandled` crafts such a curve and confirms the library computes a decayed amount without reverting.
 - **Result**: No bug – the curve is accepted and processed normally.
+
+## V2 Dutch Order With No Outputs
+- **Vector:** Execute a `V2DutchOrder` where the `baseOutputs` array is empty.
+- **Test:** `V2DutchOrderReactorZeroOutputsTest.testExecuteNoOutputs` mints input tokens to the swapper and executes the order. The filler receives the input tokens and no outputs are produced.
+- **Result:** **Bug discovered** – the contract lacks validation and transfers the swapper's tokens to the filler without any corresponding outputs.
+
+## V3 Dutch Order With No Outputs
+- **Vector:** Execute a `V3DutchOrder` where the `baseOutputs` array is empty.
+- **Test:** `V3DutchOrderReactorZeroOutputsTest.testExecuteNoOutputs` demonstrates that the filler keeps the input tokens since no outputs are specified.
+- **Result:** **Bug discovered** – orders without outputs execute successfully, allowing trivial theft of the swapper's tokens.
