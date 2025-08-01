@@ -297,3 +297,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Suspected that `_updateWithCosignerAmounts` might not persist cosigner output overrides due to copying to a memory variable.
 - **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.
 - **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
+
+## Protocol Fee Injection Persistence
+- **Vector:** Suspected that protocol fee outputs injected during `_prepare` would vanish because each order is copied into a temporary memory variable.
+- **Test:** `BaseReactor.prepareOrders` in `MockPrepareReactor` returns the mutated orders. `test_base_prepareFeeOutputsVanishing` checks that the prepared orders include the fee outputs while the original array does not.
+- **Result:** No bug – the mutation persists within the `orders` array used for execution, so protocol fees are applied as expected.
