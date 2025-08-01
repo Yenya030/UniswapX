@@ -247,8 +247,12 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `V3DutchOrder` where the `baseOutputs` array is empty.
 - **Test:** `V3DutchOrderReactorZeroOutputsTest.testExecuteNoOutputs` demonstrates that the filler keeps the input tokens since no outputs are specified.
 - **Result:** **Bug discovered** – orders without outputs execute successfully, allowing trivial theft of the swapper's tokens.
+## OrderQuoter with Malicious Reactor
+- **Description:** An order pointing to a reactor that does not revert allows `OrderQuoter.quote` to transfer tokens. The malicious reactor uses the permit to steal the swapper's tokens and returns successfully, so the Quoter does not revert.
+- **Test:** `OrderQuoterMaliciousReactorTest.testQuoteMaliciousReactorTransfersTokens` deploys such a reactor and shows the attacker receives the swapper's tokens after quoting.
+- **Result:** **Bug discovered** – quoting untrusted orders can lead to token theft.
+
 ## ERC777 Output Token Reentrancy
 - **Vector:** Use an ERC777-style token as an order output that attempts to reenter the reactor during `transferFrom` via a callback.
 - **Test:** `LimitOrderReactorOutputTokenReentrancyTest.testReentrancyDuringOutputTransfer` transfers such a token to the filler, which then reenters the reactor.
 - **Result:** The transaction reverts with `TRANSFER_FROM_FAILED`, demonstrating that reentrancy during output transfer is blocked.
-
