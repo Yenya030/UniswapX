@@ -180,6 +180,11 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test**: `UniversalRouterExecutorAllowanceAttackTest.testFillerCanDrainApprovedTokens` confirms the approval remains after callback.
 - **Result**: **Bug discovered** – allowance to Permit2 persists allowing potential token drain.
 
+## SwapRouter02Executor leftover approvals
+- **Description**: The `SwapRouter02Executor` leaves unlimited allowances to the SwapRouter after `reactorCallback`. A malicious router can steal tokens that accumulate in the executor.
+- **Test**: `SwapRouter02ExecutorAllowanceAttackTest.testFillerCanDrainApprovedTokens` demonstrates a filler draining tokens via the lingering approval.
+- **Result**: **Bug discovered** – lingering approvals enable token theft from the executor.
+
 
 ## Dutch Order With Zero Recipient
 - **Vector:** Execute a `DutchOrder` where an output recipient is the zero address.
