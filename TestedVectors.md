@@ -322,3 +322,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Execute a `V2DutchOrder` or `V3DutchOrder` where the input token is the zero address and amount is zero.
 - **Test:** `V2DutchOrderReactorZeroInputTest.testExecuteZeroInput` and `V3DutchOrderReactorZeroInputTest.testExecuteZeroInput` demonstrate that the filler provides the output tokens while receiving no input.
 - **Result:** **Bug discovered** – orders lacking input validation allow trivial token theft from the filler.
+
+## Native Output Reentrancy
+- **Vector:** Send native token output to a contract that reenters the reactor when receiving ETH.
+- **Test:** `LimitOrderReactorEthRecipientReentrancyTest.testReentrancyDuringNativeOutput` deploys `MockRecipientReentrant` which calls `executeBatch` in its receive function.
+- **Result:** The transaction reverts with `"ReentrancyGuard: reentrant call"`, showing ETH transfers cannot reenter the reactor.
