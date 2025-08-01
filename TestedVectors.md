@@ -298,6 +298,11 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.
 - **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
 
+## Native Output Sent to Reactor
+- **Vector:** Execute a `DutchOrder` where an output uses the native token and designates the reactor itself as the recipient.
+- **Test:** `DutchOrderReactorReactorRecipientTest.testReactorRecipientRefundsFiller` executes such an order. The fill contract deposits ETH during the callback, but `_fill` refunds the reactor balance back to the filler because the recipient equals the reactor.
+- **Result:** Order completes without reverting and the filler receives the ETH meant for the reactor, demonstrating missing validation for the reactor address as an output recipient.
+
 ## Protocol Fee Injection Persistence
 - **Vector:** Suspected that protocol fee outputs injected during `_prepare` would vanish because each order is copied into a temporary memory variable.
 - **Test:** `BaseReactor.prepareOrders` in `MockPrepareReactor` returns the mutated orders. `test_base_prepareFeeOutputsVanishing` checks that the prepared orders include the fee outputs while the original array does not.
