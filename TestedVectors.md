@@ -102,8 +102,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 
 ## Nonlinear Dutch Order with Unsorted Blocks
 - **Description**: Craft a `NonlinearDutchDecay` curve with `relativeBlocks` that are not strictly increasing.
-- **Test**: `NonlinearDutchDecayLibOutOfOrderTest.testOutOfOrderBlocks` executes such a curve and shows the decay increases to an unexpected amount instead of reverting.
-- **Result**: **Bug discovered** – library accepts out-of-order curves leading to unintuitive decayed values.
+- **Test**: `NonlinearDutchDecayLibOutOfOrderTest.testOutOfOrderBlocks` now expects `InvalidDecayCurve` when executing such a curve.
+- **Result**: No bug – the library reverts with `InvalidDecayCurve`, preventing out-of-order curves.
 
 
 ## Callback Order Mutation
