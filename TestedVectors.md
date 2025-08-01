@@ -318,3 +318,7 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Deposit ERC20 tokens directly to a reactor and execute an order to see if the filler can claim them.
 - **Test:** `EthOutputMockFillContractTest.testLeftoverErc20TokensRemain` sends stray tokens to the reactor, then fills an unrelated order.
 - **Result:** No bug – the tokens stay in the reactor after execution rather than being refunded or drained.
+## V2/V3 Dutch Order With Zero Input
+- **Vector:** Execute a `V2DutchOrder` or `V3DutchOrder` where the input token is the zero address and amount is zero.
+- **Test:** `V2DutchOrderReactorZeroInputTest.testExecuteZeroInput` and `V3DutchOrderReactorZeroInputTest.testExecuteZeroInput` demonstrate that the filler provides the output tokens while receiving no input.
+- **Result:** **Bug discovered** – orders lacking input validation allow trivial token theft from the filler.
