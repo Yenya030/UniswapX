@@ -297,3 +297,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Vector:** Suspected that `_updateWithCosignerAmounts` might not persist cosigner output overrides due to copying to a memory variable.
 - **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.
 - **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
+
+## Native Output Sent to Reactor
+- **Vector:** Execute a `DutchOrder` where an output uses the native token and designates the reactor itself as the recipient.
+- **Test:** `DutchOrderReactorReactorRecipientTest.testReactorRecipientRefundsFiller` executes such an order. The fill contract deposits ETH during the callback, but `_fill` refunds the reactor balance back to the filler because the recipient equals the reactor.
+- **Result:** Order completes without reverting and the filler receives the ETH meant for the reactor, demonstrating missing validation for the reactor address as an output recipient.
