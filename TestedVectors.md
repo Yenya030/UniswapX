@@ -291,4 +291,9 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 ## Exclusive Dutch Order With Zero Recipient
 - **Vector:** Execute an `ExclusiveDutchOrder` where an output recipient is the zero address.
 - **Test:** `ExclusiveDutchOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
-- **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation for recipient addresses.\n## V3 Dutch Order Cosigner Output Override Memory\n- **Vector:** Suspected that `_updateWithCosignerAmounts` might not persist cosigner output overrides due to copying to a memory variable.\n- **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.\n- **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
+- **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation for recipient addresses.
+
+## V3 Dutch Order Cosigner Output Override Memory
+- **Vector:** Suspected that `_updateWithCosignerAmounts` might not persist cosigner output overrides due to copying to a memory variable.
+- **Test:** `V3DutchOrderOutputOverrideMemoryTest.testOverrideAmountApplied` executes an order with a cosigned output amount higher than the base value.
+- **Result:** The override amount was honored and the filler transferred the expected tokens, so the memory handling is correct.
