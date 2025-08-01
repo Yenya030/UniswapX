@@ -266,3 +266,8 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Description**: Attempt to reenter a reactor during `additionalValidationContract.validate`.
 - **Test**: `LimitOrderReactorValidationReentrancyTest.testValidationReentrancy` deploys `MockValidationContractReentrant` which tries to call `execute` inside `validate` using `staticcall`.
 - **Result**: The call fails and the transaction reverts with `"call failed"`, showing the view restriction prevents reentrancy.
+
+## Exclusive Dutch Order With Zero Recipient
+- **Vector:** Execute an `ExclusiveDutchOrder` where an output recipient is the zero address.
+- **Test:** `ExclusiveDutchOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
+- **Result:** Order executes successfully and tokens are irretrievably sent to the zero address, showing missing validation for recipient addresses.
