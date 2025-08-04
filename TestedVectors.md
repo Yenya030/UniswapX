@@ -241,6 +241,13 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Result:** No bug – the transaction reverts, so fillers cannot be tricked into losing tokens.
 
 
+## Priority Order With Native Input Amount
+- **Severity**: Medium
+- **Description**: Execute a `PriorityOrder` where the input token is the zero address and the amount is non-zero.
+- **Test**: `PriorityOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` shows the filler transfers output tokens while receiving no input due to missing validation.
+- **Result**: **Bug discovered** – native input orders execute successfully, allowing trivial token loss for the filler.
+
+
 ## Priority Order With Zero Recipient
 - **Vector:** Execute a `PriorityOrder` where an output recipient is the zero address.
 - **Test:** `PriorityOrderReactorZeroRecipientTest.testExecuteZeroRecipient` burns the output tokens by sending them to `address(0)`.
