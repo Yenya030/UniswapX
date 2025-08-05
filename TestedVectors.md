@@ -241,6 +241,13 @@ We tested whether invoking `OrderQuoter.quote` with a fully signed order could t
 - **Result:** No bug – the transaction reverts, so fillers cannot be tricked into losing tokens.
 
 
+## V2 Dutch Order With Native Input Amount
+- **Severity**: Medium
+- **Description**: Execute a `V2DutchOrder` where the input token is the zero address and the amount is non-zero.
+- **Test**: `V2DutchOrderReactorNativeInputNonZeroTest.testExecuteNativeInputNonZeroAmount` shows the filler transfers output tokens while receiving no input due to missing validation.
+- **Result**: **Bug discovered** – native input orders execute successfully, allowing trivial token loss for the filler.
+
+
 ## Priority Order With Native Input Amount
 - **Severity**: Medium
 - **Description**: Execute a `PriorityOrder` where the input token is the zero address and the amount is non-zero.
